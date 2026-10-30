@@ -1,0 +1,30 @@
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap");
+@import "tailwindcss";
+
+/* Game design system (replaces the flat AI-template look):
+   - Fredoka for headings/brand, Nunito for body — rounded, playful type
+     alone kills half the generic feel.
+   - Living background: soft blobs + a faint dot pattern instead of a
+     flat wash. Large type and tall tap targets are kept for elderly
+     players — style never shrinks them. */
+@theme {
+  --color-ink: #0f172a;
+  --font-display: "Fredoka", "Nunito", sans-serif;
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: #eef2ff;
+  background-image:
+    radial-gradient(ellipse 480px 320px at 8% -4%, rgba(167, 139, 250, 0.45), transparent 70%),
+    radial-gradient(ellipse 420px 300px at 95% 12%, rgba(244, 114, 182, 0.35), transparent 70%),
+    radial-gradient(ellipse 380px 280px at 50% 108%, rgba(129, 140, 248, 0.35), transparent 70%),
+    radial-gradient(rgba(99, 102, 241, 0.14) 1.5px, transparent 1.6px);
+  background-size: auto, auto, auto, 28px 28px;
+  background-attachment: fixed;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
