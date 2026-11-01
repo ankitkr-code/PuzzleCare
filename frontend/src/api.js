@@ -1,7 +1,7 @@
 // Tiny fetch wrapper around the Spring Boot backend.
 // Attaches the JWT from localStorage as a Bearer token.
 
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:8080").replace(/\/$/, "");
 
 export function getToken() {
   return localStorage.getItem("pc_token");

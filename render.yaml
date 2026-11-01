@@ -1,0 +1,22 @@
+# Render blueprint for the PuzzleCare backend (free web service, Docker).
+# The database lives outside Render (TiDB Serverless free tier, MySQL-compatible);
+# its connection details go in as env vars in the Render dashboard (sync: false
+# means Render prompts for the values instead of storing them here).
+services:
+  - type: web
+    name: puzzlecare-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: APP_JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
