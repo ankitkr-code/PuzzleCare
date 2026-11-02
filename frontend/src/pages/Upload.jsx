@@ -14,24 +14,24 @@ export default function Upload() {
   async function refresh() {
     const list = await api("/api/images");
     setImages(list);
-    const next = {};
-    for (const img of list) {
+    const entries = await Promise.all(list.map(async (img) => {
       try {
-        next[img.id] = await imageObjectUrl(img.id);
+        return [img.id, await imageObjectUrl(img.id)];
       } catch {
-        /* skip */
+        return null;
       }
-    }
-    setUrls((prev) => {
-      Object.values(prev).forEach((u) => URL.revokeObjectURL(u));
-      return next;
-    });
+    }));
+    setUrls(Object.fromEntries(entries.filter(Boolean)));
   }
 
   useEffect(() => {
     refresh().catch(() => setStatus("Could not load your photos."));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => () => {
+    Object.values(urls).forEach((url) => URL.revokeObjectURL(url));
+  }, [urls]);
 
   async function handleUpload(e) {
     e.preventDefault();
@@ -42,13 +42,10 @@ export default function Upload() {
     try {
       const form = new FormData();
       form.append("file", file);
-      await fetch("http://localhost:8080/api/images", {
+      await api("/api/images", {
         method: "POST",
         headers: { Authorization: `Bearer ${getToken()}` },
         body: form,
-      }).then((res) => {
-        if (!res.ok) throw new Error("upload failed");
-        return res.json();
       });
       setFile(null);
       e.target.reset();

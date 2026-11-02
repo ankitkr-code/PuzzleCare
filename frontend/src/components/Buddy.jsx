@@ -19,8 +19,10 @@ import blobee from "../assets/blobee.json";
 export default function Buddy({ mode = "roam", message = null, messageKey = null }) {
   const [pos, setPos] = useState({ x: 8, y: 76 });
   const [facing, setFacing] = useState(1);
-  const [showBubble, setShowBubble] = useState(false);
+  const [hiddenBubbleKey, setHiddenBubbleKey] = useState(null);
   const posRef = useRef(pos);
+  const bubbleKey = messageKey ?? message;
+  const showBubble = Boolean(message) && bubbleKey !== hiddenBubbleKey;
 
   // Free roaming: wander to a new random spot every few seconds.
   useEffect(() => {
@@ -38,10 +40,9 @@ export default function Buddy({ mode = "roam", message = null, messageKey = null
   // Speech bubble: show on every new message, hide by itself.
   useEffect(() => {
     if (!message) return undefined;
-    setShowBubble(true);
-    const timer = setTimeout(() => setShowBubble(false), 4500);
+    const timer = setTimeout(() => setHiddenBubbleKey(bubbleKey), 4500);
     return () => clearTimeout(timer);
-  }, [message, messageKey]);
+  }, [bubbleKey, message]);
 
   const parked = mode === "parked";
   const wrapperStyle = parked

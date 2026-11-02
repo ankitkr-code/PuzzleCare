@@ -22,6 +22,12 @@ export default function Game() {
   const [matched, setMatched] = useState([]);
   const [moves, setMoves] = useState(0);
   const [status, setStatus] = useState("");
+  const pendingFlipTimeouts = useRef(new Set());
+
+  function clearFlipTimeouts() {
+    pendingFlipTimeouts.current.forEach(clearTimeout);
+    pendingFlipTimeouts.current.clear();
+  }
 
   // Blobee buddy (parked in game time): speaks on match/miss, never roams.
   const [buddyMessage, setBuddyMessage] = useState(null);
@@ -64,22 +70,38 @@ export default function Game() {
   }
 
   useEffect(() => {
+    let cancelled = false;
     api("/api/images")
       .then(async (list) => {
-        const next = [];
-        for (const img of list) {
+        const next = await Promise.all(list.map(async (img) => {
           try {
-            next.push({ id: img.id, url: await imageObjectUrl(img.id) });
+            return { id: img.id, url: await imageObjectUrl(img.id) };
           } catch {
-            /* skip */
+            return null;
           }
+        }));
+        const loaded = next.filter(Boolean);
+        if (cancelled) {
+          loaded.forEach(({ url }) => URL.revokeObjectURL(url));
+          return;
         }
-        setPool(next);
+        setPool(loaded);
       })
-      .catch(() => setStatus("Could not load your photos."));
+      .catch(() => {
+        if (!cancelled) setStatus("Could not load your photos.");
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
+  useEffect(() => () => {
+    clearFlipTimeouts();
+    pool.forEach(({ url }) => URL.revokeObjectURL(url));
+  }, [pool]);
+
   function startGame(lvl) {
+    clearFlipTimeouts();
     const pairs = LEVEL_PAIRS[lvl];
     const chosen = shuffle(pool).slice(0, pairs);
     const cards = shuffle(
@@ -107,17 +129,21 @@ export default function Game() {
       setMoves((m) => m + 1);
       const [a, b] = next.map((k) => deck.find((c) => c.key === k));
       if (a.imageId === b.imageId) {
-        setTimeout(() => {
+        const timeout = setTimeout(() => {
+          pendingFlipTimeouts.current.delete(timeout);
           play("match");
           setMatched((m) => [...m, a.imageId]);
           setFlipped([]);
           cheer("Woo, nice move!");
         }, 750);
+        pendingFlipTimeouts.current.add(timeout);
       } else {
-        setTimeout(() => {
+        const timeout = setTimeout(() => {
+          pendingFlipTimeouts.current.delete(timeout);
           setFlipped([]);
           cheer("So close! Try again, you've got this!");
         }, 1000);
+        pendingFlipTimeouts.current.add(timeout);
       }
     }
   }

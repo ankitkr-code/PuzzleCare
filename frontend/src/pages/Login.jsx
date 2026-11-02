@@ -20,7 +20,7 @@ export default function Login() {
       });
       setSession(data.token, { name: data.name, patientName: data.patientName });
       navigate("/dashboard");
-    } catch (err) {
+    } catch {
       setError("Login failed — check your email and password.");
     }
   }

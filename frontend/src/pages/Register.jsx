@@ -23,7 +23,7 @@ export default function Register() {
       });
       setSession(data.token, { name: data.name, patientName: data.patientName });
       navigate("/dashboard");
-    } catch (err) {
+    } catch {
       setError("Could not create the account — this email may already be registered.");
     }
   }

@@ -4,17 +4,28 @@ A full-stack starter project: a caregiver creates an account, uploads familiar
 photos of their patient, and the patient plays a level-based memory-match game
 built from those photos. Pairs grow with each level.
 
-- **Backend:** Spring Boot 4 / Java 17 / Maven, JWT auth, MySQL
+- **Backend:** Spring Boot 4 / Java 25 / Maven, JWT auth, MySQL
 - **Frontend:** React (Vite) + Tailwind CSS v4 + react-router-dom, responsive
 
 ## Prerequisites
 
-- **JDK 17+** (`java -version`)
+- **JDK 25+** (`java -version`)
 - **MySQL 8** running locally, with a `puzzle_game` database
   (the app also works with `createDatabaseIfNotExist=true`, so it can create it itself)
-- **Node.js 18+** (`node --version`)
+- **Node.js 20.19+ or 22.12+** (`node --version`)
 
 ## Run the backend
+
+Set your local database credentials and a private, Base64-encoded JWT signing
+key (at least 32 bytes before encoding). Do not commit these values:
+
+```powershell
+$env:DB_USERNAME = "root"
+$env:DB_PASSWORD = "<your MySQL password>"
+$env:APP_JWT_SECRET = "<Base64-encoded random key>"
+```
+
+Generate a signing key with `openssl rand -base64 48`.
 
 ```bash
 cd backend
@@ -22,8 +33,8 @@ cd backend
 ```
 
 Runs on `http://localhost:8080`. Tables are auto-created
-(`spring.jpa.hibernate.ddl-auto=update`). Update the DB username/password in
-`src/main/resources/application.properties` if yours differ from `root`/`root`.
+(`spring.jpa.hibernate.ddl-auto=update`). `DB_USERNAME` defaults to `root`;
+`DB_PASSWORD` and `APP_JWT_SECRET` must be supplied through the environment.
 
 Uploaded photos are stored on disk under `uploads/{userId}/` (created
 automatically on first upload), with one row per photo in the `images` table.
@@ -37,7 +48,9 @@ npm run dev
 ```
 
 Opens on `http://localhost:5173`. The frontend talks to the backend at
-`http://localhost:8080` (CORS is already enabled for the Vite dev server).
+`http://localhost:8080` by default (CORS is already enabled for the Vite dev
+server). Set `VITE_API_BASE_URL` when building the frontend to point at a
+different backend URL.
 
 ## API endpoints
 
